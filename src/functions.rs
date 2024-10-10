@@ -11,8 +11,10 @@ enum Status {
     Dead,
 }
 
+//TODO: Restructure catch_or_not and die_or_not to be more testable
+
 // Function to simulate if a person gets infected
-fn catch_or_not(tprob: f64, num_people: usize, status_vec: &[Status]) -> bool {
+fn catch_or_not_old(tprob: f64, num_people: usize, status_vec: &[Status]) -> bool {
     let mut rng = rand::thread_rng();
     let mut got_infected = false;
 
@@ -31,8 +33,24 @@ fn catch_or_not(tprob: f64, num_people: usize, status_vec: &[Status]) -> bool {
     got_infected
 }
 
+//NEW CATCH_OR_NOT
+fn catch_or_not(tprob: f64, mut person: Status, encounters_vec: &[Status]) -> Status {
+    let mut rng = rand::thread_rng();
+
+    for encounter in encounters_vec {
+        let rand_num: f64 = rng.gen();  // Generates a random number between 0.0 and 1.0
+
+        if tprob < rand_num {
+            person = Status::Infected(1);
+        }
+    }
+
+    person
+}
+
+
 // Function to simulate if a person dies, recovers, or stays infected
-fn die_or_not(
+fn die_or_not_old(
     dprob: f64, 
     sick_days: u32, 
     person: usize, 
@@ -54,6 +72,30 @@ fn die_or_not(
     output_status
 }
 
+//NEW DIE_OR_NOT
+fn die_or_not(dprob: f64, sick_days: u32, mut person: Status) -> Status {
+    let mut rng = rand::thread_rng();
+
+    let rand_num: f64 = rng.gen::<f64>();
+
+    match person { //TODO: look more into match keyword
+        Status::Infected(days) => {
+            if rand_num < dprob {
+                person = Status::Dead;
+            } else {
+                if days >= sick_days {
+                    person = Status::Recovered;
+                } else {
+                    person = Status::Infected(days + 1);
+                }
+            }
+        }
+        _ => {}  // Do nothing if the person is not infected
+    }
+
+    person
+}
+
 // Helper function to get a random number of exposures (just for simulation purposes)
 fn get_rand_num_exposures(num_people: usize) -> usize {
     let mut rng = rand::thread_rng();
@@ -73,13 +115,13 @@ fn get_living_person(status_vec: &[Status]) -> Status {
 }
 
 
-fn main() {
-    // Example usage:
-    // let status_vec = vec![Status::Susceptible; 10000];
-    // let infected = catch_or_not(0.5, 10000, &status_vec);
-    // println!("Infected: {}", infected);
-    println!("Hello World");
-}
+// fn main() {
+//     // Example usage:
+//     // let status_vec = vec![Status::Susceptible; 10000];
+//     // let infected = catch_or_not(0.5, 10000, &status_vec);
+//     // println!("Infected: {}", infected);
+//     println!("Hello World");
+// }
 
 
 #[cfg(test)]
@@ -91,7 +133,7 @@ mod tests {
         // Test with one infected person in the group
         let status_vec = vec![
             Status::Susceptible, 
-            Status::Infected(2), 
+            Status::Infected(2), //TODO: change Infected to more specific name to represent count
             Status::Vaccinated
         ];
         let result = catch_or_not(0.5, status_vec.len(), &status_vec);

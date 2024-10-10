@@ -2,6 +2,15 @@ fn generate_list(n: usize) -> Vec<i32> {
     (0..n as i32).collect() 
 } 
 
+fn generate_even_list_1(n: usize) -> Vec<i32> {
+    (0..n as i32).filter(|&x| x % 2 == 0).collect()
+}
+
+fn generate_even_list_2(n: usize) -> Vec<i32> {
+    (0..n as i32).map(|x| x * 2).collect()
+}
+
+
 #[cfg(test)] 
 mod tests { 
     use super::*; 
