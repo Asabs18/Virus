@@ -3,14 +3,19 @@ use std::io::{self, BufWriter, Write};
 
 //MVC traits
 trait Model<T> {
+    //TODO: Properties in rust?!
     fn get_data(&self) -> &T;
     fn set_data(&mut self, data: T);
+    //fn update(&mut self, data: T) -> &Model<T>;
 }
 trait View<T> {
-    fn print(&mut self) -> io::Result<()>;
+    //TODO: force to be a Model<T> instead of T
+    fn print(&mut self) -> io::Result<()>; //rename render, pass in model instead of creating on construction, get rid of return value or change to bool
+                                           //fn debug(&mut self) -> String; returns format to output to console
 }
 
 trait Controller<T> {
+    //TODO: change run to take in Models and Viewers needed
     fn run(&mut self) -> bool; // Return bool indicating whether to continue
 }
 
@@ -48,6 +53,7 @@ struct PersonModel {
 impl PersonModel {
     // Create a new person with a unique ID and initial status
     fn new(id: u32) -> Self {
+        //TODO: default params??
         Self {
             id,
             status: Status::Susceptible,
@@ -70,6 +76,14 @@ impl Model<PersonModel> for PersonModel {
 
     fn get_data(&self) -> &PersonModel {
         &self
+    }
+}
+
+impl View<PersonModel> for PersonModel {
+    //TODO: Look into multiple definitions of traits on same struct
+    fn print(&mut self) -> io::Result<()> {
+        println!("{}", self.to_string());
+        Ok(())
     }
 }
 
